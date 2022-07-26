@@ -36,11 +36,14 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials"
         )
-    user = crud.get(db, id=token_data.sub)
+    user = crud.user.get(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# def get_current_active_admin(
-#     current_user: models.User = Depends(get_current_user)
-# )
+def get_current_active_admin(
+    current_user: models.User = Depends(get_current_user),
+) -> models.User:
+    if not current_user.has_admin_access:
+        raise HTTPException(status_code=401, detail="The user doesn't have enough privileges")
+    return current_user
