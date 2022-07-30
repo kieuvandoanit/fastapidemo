@@ -18,7 +18,7 @@ def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_admin)
+    current_user: models.User = Depends(deps.get_current_admin)
 ) -> Any:
     """
     <h4>Only <b>admin</b> can access this api</h4>
@@ -56,7 +56,7 @@ def create_user(
     *,
     db: Session = Depends(deps.get_db),
     user_in: schemas.UserCreate,
-    current_user: models.User = Depends(deps.get_current_active_admin),
+    # current_user: models.User = Depends(deps.get_current_admin),
 ) -> Any:
     """
     <h4>Only <b>admin</b> can access this api</h4>
@@ -64,12 +64,11 @@ def create_user(
     """
     user = crud.user.get_user(
         db,
-        username=user_in.username,
         email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username or email already exists"
+            detail="The user with this email already exists"
         )
     try:
         user = crud.user.create(db, obj_in=user_in)
@@ -94,7 +93,7 @@ def update_user_by_id(
     user_id: int,
     obj_in: schemas.UserUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_admin)
+    current_user: models.User = Depends(deps.get_current_admin)
 ) -> schemas.User:
     user = crud.user.get(db=db, id=user_id)
     if not user:
@@ -106,7 +105,7 @@ def update_user_by_id(
 def remove_user(
     user_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_admin)
+    current_user: models.User = Depends(deps.get_current_admin)
 ) -> schemas.User:
     user = crud.user.get(db=db, id=user_id)
     if not user:

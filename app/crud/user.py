@@ -10,19 +10,20 @@ from app.core.security import get_password_hash, verify_password
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     # Declare model specific CRUD operation methods.
-    def get_user(self, db: Session, *, email: str = None, username: str) -> Optional[User]:
-        if not email:
-            return db.query(User).filter(User.username == username).first()
-        return db.query(User).filter((User.email == email) | (User.username == username)).first()
+    def get_user(self, db: Session, *, email: str) -> Optional[User]:
+        return db.query(User).filter(User.email == email).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         email = obj_in.email.lower() if obj_in.email else None
         db_obj = User(
             email=email,
-            hashed_password=get_password_hash(obj_in.password),
-            full_name=obj_in.full_name,
-            username=obj_in.username,
-            role=obj_in.role
+            passwordHash=get_password_hash(obj_in.password),
+            firstName=obj_in.firstName,
+            middleName=obj_in.middleName,
+            lastName=obj_in.lastName,
+            mobile=obj_in.mobile,
+            admin=obj_in.admin,
+            vendor=obj_in.vendor
         )
         db.add(db_obj)
         db.commit()
@@ -37,24 +38,19 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
         if 'password' in update_data:
-            hashed_password = get_password_hash(update_data["password"])
+            passwordHash = get_password_hash(update_data["password"])
             del update_data["password"]
-            update_data["hashed_password"] = hashed_password
-        if 'role' in update_data and update_data['role'] is None:
-            update_data['role'] = db_obj.role
+            update_data["passwordHash"] = passwordHash
         updated = super().update(db, db_obj=db_obj, obj_in=update_data)
         return updated
     
     def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
-        user = self.get_user(db, email=email, username=email)
+        user = self.get_user(db, email=email)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        if not verify_password(password, user.passwordHash):
             return None
         return user
-    
-    def is_active(self, user: User) -> bool:
-        return user.is_active
     
     def get_all(self, db: Session) -> List[User]:
         return db.query(self.model).all()

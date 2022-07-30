@@ -6,4 +6,4 @@ export PYTHONPATH=.
 alembic upgrade head
 
 # Create initial data in DB
-python -m app.initialiser
+# python -m app.initialiser

@@ -41,7 +41,7 @@ def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-def get_current_active_admin(
+def get_current_admin(
     current_user: models.User = Depends(get_current_user),
 ) -> models.User:
     if not current_user.has_admin_access:
