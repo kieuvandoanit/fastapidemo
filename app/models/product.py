@@ -25,7 +25,7 @@ class Product(Base):
     content = Column(String, nullable=True)
 
     user = relationship("User", back_populates="product")
-    # product_category = relationship("Product_Category", back_populates="product")
+    product_category = relationship("Product_Category", back_populates="product")
     # product_meta = relationship("Product_Meta", back_populates="product")
     # product_review = relationship("Product_Review", back_populates="product")
     # order_item = relationship("Order_Item", back_populates="product")

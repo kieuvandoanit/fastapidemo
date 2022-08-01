@@ -13,6 +13,6 @@ class Category(Base):
     content = Column(String, nullable=True)
 
     children = relationship("Category", back_populates="parent")
-    parent = relationship("Category", back_populates="children")
+    parent = relationship("Category", back_populates="children", remote_side=[id])
     product_category = relationship("Product_Category", back_populates="category")
 

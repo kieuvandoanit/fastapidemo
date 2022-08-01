@@ -9,29 +9,38 @@ from app.api.deps import get_current_user, get_db
 router = APIRouter()
 
 
-# @router.get("", response_model=List[schemas.Product])
-# def read_products(
-#     db: Session = Depends(get_db),
-#     skip: int = 0, 
-#     limit: int = 100
-# ) -> Any:
-#     """
-#     Retrieve all products.
-#     """
-#     products = crud.product.get_multi(db, skip=skip, limit=limit)
-#     return products
-
 @router.get("", response_model=List[schemas.Product])
-def get_product_by_userId(
+def read_products(
+    db: Session = Depends(get_db),
+    skip: int = 0, 
+    limit: int = 100,
+    user_id: int = None
+) -> Any:
+    """
+    Retrieve all products.
+    """
+    if user_id is None:
+        products = crud.product.get_multi(db, skip=skip, limit=limit)
+    else:
+        user = crud.user.get(db=db, id=user_id)
+        if not user:
+            raise HTTPException(status_code=400, detail="User is not found")
+        products = crud.product.get_by_userId(db=db, user_id=user_id, skip=skip, limit=limit)
+    return products
+
+@router.get("/${product_id}", response_model=schemas.Product)
+def get_product_by_id(
     *,
     db: Session = Depends(get_db),
-    user_id: int,
+    product_id: int
 ) -> Any:
-    user = crud.user.get(db=db, id=user_id)
-    if not user:
-        raise HTTPException(status_code=400, detail="User is not found")
-    products = crud.product.get_by_userId(db=db, user_id=user_id)
-    return products
+    """
+    Get product by id
+    """
+    product = crud.product.get(db=db, id=product_id)
+    if not product:
+        HTTPException(status_code=400, detail="Product is not found")
+    return product
 
 @router.post("", response_model=schemas.Product)
 def create_product(

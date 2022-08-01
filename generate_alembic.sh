@@ -3,5 +3,5 @@
 export PYTHONPATH=.
 
 # Run migrations
-alembic revision --autogenerate -m "create table user"
+alembic revision --autogenerate -m "create table product_category"
 
